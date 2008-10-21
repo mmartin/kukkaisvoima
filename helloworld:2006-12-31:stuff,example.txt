@@ -1,0 +1,14 @@
+Hello world
+
+<p>This is example entry. First line is always headline. Below the
+headline html markup can be used for the actual blog entry.<p>
+
+<ul>
+	<li>Like this<li>
+	<li>And this<li>
+</ul>
+
+<p>Remember to change the config variables in index.cgi, otherwise
+links and comments wont work!</p>
+
+<p>Have fun!</p>

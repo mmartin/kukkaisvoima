@@ -1,0 +1,79 @@
+Kukkaisvoima
+
+What?
+
+Kukkaisvoima is a lightweight weblog system licensed under GNU Affero General
+Public License. Kukkaisvoima is made with Python programming language. It
+stores all blog entries as plain text files so you can easily write and edit
+those with your favorite editor. Motivation for Kukkaisvoima was to do simple
+everything in one package weblog with Python.
+
+Features:
+
+  • Multiple categories for one entry
+  • No external dependencies outside Pythons standard library (no need for
+    database engine etc.)
+  • Comments
+  • Nice archive pages for old entries
+  • Search
+  • RSS feed for all entries and for every category
+
+You can see Kukkaisvoima in action here (http://23.fi/blogi) (entries
+are mainly in finnish), there is also Kukkaisvoima category
+(http://23.fi/blogi/Kukkaisvoima) which contains Kukkaisvoima news in
+english.
+
+Kukkaisvoima comes with minimal documentation so some knowledge of Unix like
+operating system is needed to get started with Kukkaisvoima.
+
+Where to get it?
+
+You can get the latest version of Kukkaisvoima here:
+http://23.fi/kukkaisvoima/latest.tar.gz
+
+Install instructions
+
+After downloading the latest version of Kukkaisvoima. Move the package to your
+webdirectory and do the following steps:
+
+      tar xvfz kukkaisvoima-(versionnumber).tar.gz
+      cd kukkaisvoima-(versionnumber)
+      chmod +x index.cgi
+      mkdir temp
+
+
+You may need to modify the index.cgi script suffix (change .cgi to .py) or use
+different permissions for the index.cgi script or for the temp directory. Temp
+directory should be writable by the script. For more information and help
+consult your webserver manual or local Python/Unix guru.
+
+Configuring and using
+
+Edit the Config variables found in kukkaisvoima_settings.py. After configuring
+you can write blog entries as html formatted text files in directory specified
+in config file. Kukkaisvoima will generate the blog from these entries. Every
+entry must be in the format of
+
+    nameoftheantry:YYYY-MM-DD:category1,category2.txt
+
+For example:
+
+ helloworld:2006-12-28:general.txt
+
+
+As seen in the example entry can have multiple categories separeted with comma.
+
+Different versions
+
+There is also C version of Kukkaisvoima called suvi 67 available. For
+more information see this blog entry
+(http://23.fi/blogi/kukkaisvoima_version_suvi_67%3A2008-1-27%3AKukkaisvoim)
+or the source code (http://23.fi/kukkaisvoima/kukkaisvoima_suvi_67.c).
+
+Contact the author
+
+You can contact the author by sending email to kukkaisvoima at this domain
+(23.fi).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Last modified: Mon Aug 11 17:57:09 EEST 2008
