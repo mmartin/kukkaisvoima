@@ -177,7 +177,7 @@ def removeHtmlTags(line):
 
 
 class Comment:
-    urlre = re.compile('(http|https|ftp)://([A-Za-z0-9/:@_%~#=&\.\-\?]+)')
+    urlre = re.compile('(http|https|ftp)://([A-Za-z0-9/:@_%~#=&\.\-\?\+]+)')
     def __init__(self, author, email, url, comment):
         self.author = author
         self.email = email
