@@ -26,7 +26,7 @@ import os
 from urllib import quote_plus, unquote_plus
 from time import localtime, strptime, strftime
 from sets import Set
-from datetime import datetime
+from datetime import datetime, timedelta
 import cgitb; cgitb.enable()
 import smtplib
 from email.MIMEText import MIMEText
@@ -94,7 +94,7 @@ l_search2 = "No matches"
 from kukkaisvoima_settings import *
 
 # version
-version = '9'
+version = '10beta'
 
 # for date collisions
 dates = {}
@@ -115,7 +115,7 @@ def generateDate(fileName):
     # if date collision happens add seconds to date
     if dates.has_key(date) and not dates[date] == fileName:
         while dates.has_key(date):
-            date = date.replace(second=date.second+1)
+            date += timedelta(seconds=1)
     dates[date] = fileName
     return date
 
