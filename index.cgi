@@ -3,7 +3,7 @@
 
 Kukkaisvoima a lightweight weblog system.
 
-Copyright (C) 2006-2008 Petteri Klemola
+Copyright (C) 2006-2010 Petteri Klemola
 
 Kukkaisvoima is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -64,6 +64,8 @@ nospamanswer = '5'
 # This is admin password to manage comments. password should be
 # something other than 'password'
 passwd = 'password'
+# New in version 10
+sidebarcomments = True
 
 # Language variables
 l_archives = 'Archives'
@@ -89,6 +91,9 @@ l_do_you_delete = 'Your about to delete comment this, are you sure you want to t
 # new in version 8
 l_search = "Search"
 l_search2 = "No matches"
+# new in version 10
+l_recent_comments = "Recent comments"
+
 
 # import user settings
 from kukkaisvoima_settings import *
@@ -187,9 +192,19 @@ class Comment:
 
     def getUrl(self):
         url = self.url
+        if not url:
+            return None
         if not url.startswith('http://'):
             url = 'http://%s' % url
         return url
+
+    def getAuthorLink(self):
+        url = self.getUrl()
+        if url is None:
+            return "%s" % self.author
+        else:
+            return "<a href=\"%s\"  rel=\"external nofollow\">%s</a>"\
+                % (url, self.author)
 
     def getText(self):
         comment = str(self.comment)
@@ -213,6 +228,7 @@ def pickleComment(author, email, url, comment, filename, indexdir):
     commentfile = open(os.path.join(indexdir,'comment-%s' % filename), 'wb')
     pickle.dump(comments, commentfile)
     commentfile.close()
+    updateCommentList()
 
 def getComments(filename):
     comments = list()
@@ -230,7 +246,55 @@ def deleteComment(filename, commentnum):
     commentfile = open(os.path.join(indexdir,'comment-%s' % filename), 'wb')
     pickle.dump(comments, commentfile)
     commentfile.close()
+    updateCommentList()
     return
+
+def getCommentList():
+    """Gets list of comments from the comment index"""
+    commentlist = list()
+
+    # generate list of comments if it does not exist
+    if os.path.exists(os.path.join(indexdir,'recent_comments.index')) is False:
+        updateCommentList()
+    try:
+        comindex = open(os.path.join(indexdir,'recent_comments.index'), 'rb')
+        commentlist = pickle.load(comindex)
+        comindex.close()
+    except:
+        pass
+    return commentlist
+
+
+def updateCommentList():
+    """Updates latest comments list"""
+    commentlist = list()
+    commentlist_tmp = list()
+
+    for cfile in [x for x in os.listdir(indexdir) if x.startswith("comment-")]:
+        cfile = cfile.replace("comment-", "", 1)
+        num = 1
+        comments = list()
+        for cm in getComments(cfile):
+            comments.append((cfile, cm, num))
+            num += 1
+        commentlist_tmp += comments
+        # sort and leave 10 latests
+        commentlist_tmp.sort(key=lambda com: com[1].date, reverse=True)
+        commentlist_tmp = commentlist_tmp[:10]
+
+    for c in commentlist_tmp:
+        # get subject from commented entry
+        entry = Entry(c[0], datadir)
+        commentlist.append({"authorlink" : c[1].getAuthorLink(),
+                            "file" : c[0],
+                            "num" : c[2],
+                            "author" : c[1].author,
+                            "subject" : entry.headline})
+
+    commentfile = open(os.path.join(indexdir,'recent_comments.index'), 'wb')
+    pickle.dump(commentlist, commentfile)
+    commentfile.close()
+
 
 class Entry:
     def __init__(self, fileName, datadir):
@@ -472,9 +536,8 @@ def renderDeleteComments(entry, commentnum):
     comment = comments[commentnum-1]
     print "<ol>"
     print "<li>"
-    print "<cite><a href=\"%s\" rel=\"external nofollow\">%s</a></cite>:" % (
-        comment.getUrl(),
-        comment.author)
+    print "<cite>%s</cite>:" % comment.getAuthorLink()
+
     print "<br />"
     print "<small>%s</small>" % (
         str(comment.date)[:-7])
@@ -561,9 +624,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 for comment in entry.comments:
                     numofcomment = numofcomment +1
                     print "<li>"
-                    print "<cite><a href=\"%s\" rel=\"external nofollow\">%s</a></cite>:" % (
-                        comment.getUrl(),
-                        comment.author)
+                    print "<cite>%s</cite>:" % comment.getAuthorLink()
                     print "<br />"
                     delcom = ""
                     if admin:
@@ -641,6 +702,21 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
     print "<input type=\"submit\" value=\"%s\" />" % l_search
     print "</form>"
 
+    if sidebarcomments:
+        print "<h2>%s</h2>" % l_recent_comments
+        comlist = getCommentList()
+        if len(comlist) == 0:
+            "No comments"
+        else:
+            print "<ul>"
+            for com in comlist:
+                print "<li>%s on <a href=\"%s/%s#comment-%d\">%s</a>"\
+                    % (com["authorlink"], baseurl,
+                       quote_plus(com["file"][:-4]), com["num"], com["subject"])
+                print "</li>"
+        print "</ul>"
+
+    # archive
     print "<h2><a href=\"%s/archive\">%s</a></h2>" % (baseurl, l_archives)
     print "<ul>"
     sortedarc = arclist.keys()
@@ -762,6 +838,7 @@ def main():
 
     filelist = {}
     for file in entries:
+        # FIXME why is this os.stat here?
         mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime = os.stat(
             os.path.join(datadir,file))
         filelist[generateDate(os.path.join(datadir,file))] = file
