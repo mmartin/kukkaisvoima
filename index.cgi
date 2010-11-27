@@ -32,6 +32,15 @@ import smtplib
 from email.MIMEText import MIMEText
 import re
 import locale
+# kludge to get md5 hexdigest working on all python versions. Function
+# md5fun should be used only to get ascii like this
+# md5fun("kukkaisvoima").hexdigest()
+try:
+    from hashlib import md5 as md5fun
+except ImportError: # older python (older than 2.5) does not hashlib
+    import md5
+    md5fun = md5.new
+
 
 # Config variables
 # Url of the blog (without trailing /)
@@ -66,6 +75,9 @@ nospamanswer = '5'
 passwd = 'password'
 # New in version 10
 sidebarcomments = True
+# Gravatar support (picture in comments according to email), see
+# http://gravatar.com for more information
+gravatarsupport = True
 
 # Language variables
 l_archives = 'Archives'
@@ -212,6 +224,9 @@ class Comment:
         comment = self.urlre.sub(r'<a href="\1://\2">\1://\2</a>',
                                  comment)
         return comment
+
+    def getEmailMd5Sum(self):
+        return md5fun(self.email).hexdigest()
 
 def pickleComment(author, email, url, comment, filename, indexdir):
     filename = filename.replace('/', '').replace('\\', '')
@@ -620,10 +635,14 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
             numofcomment = 0
             if len(entry.comments) > 0 and maxcomments > -1:
                 print "<h3><a name=\"comments\"></a>%s</h3>" % l_comments
-                print "<ol>"
+                print "<ol style=\"list-style-type:none;\">"
                 for comment in entry.comments:
                     numofcomment = numofcomment +1
                     print "<li>"
+                    if gravatarsupport:
+                        print "<img style=\"padding-right:5px;\""
+                        print "src=\"http://gravatar.com/avatar/%s?s=40\" align=\"left\"/>" % (
+                            comment.getEmailMd5Sum())
                     print "<cite>%s</cite>:" % comment.getAuthorLink()
                     print "<br />"
                     delcom = ""
