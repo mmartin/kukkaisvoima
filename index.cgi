@@ -396,6 +396,68 @@ def renderHtmlHeader(title=None, links=[]):
     for i in links:
         print i
 
+    # Javascript. Used to validate comment form, nice eh :P
+    print """
+          <script type="text/javascript">
+          function validate_not_null(field, msg)
+          {
+              if (field.value == null || field.value == "")
+              {
+                  alert(msg);
+                  return false;
+              }
+              return true;
+          }
+
+          function validate_email(field, msg)
+          {
+              at_index = field.value.indexOf("@");
+              if ((at_index > 1) && (field.value.lastIndexOf(".") > at_index))
+              {
+                  return true;
+              }
+              alert(msg);
+              return false;
+          }
+
+          function validate_nospam(field, msg)
+          {
+              if (field.value == "%s")
+              {
+                  return true;
+              }
+              alert(msg);
+              return false;
+          }
+
+          function validate_form(thisform)
+          {
+              with (thisform)
+              {
+                  if (validate_not_null(author, "Name must be filled in") == false)
+                  {
+                      author.focus();
+                      return false;
+                  }
+                  if (validate_email(email,"Email must be filled in and must be valid!") == false)
+                  {
+                      email.focus();
+                      return false;
+                  }
+                  if (validate_nospam(nospam, "Wrong answer!") == false)
+                  {
+                      nospam.focus();
+                      return false;
+                  }
+                  if (validate_not_null(comment, "Comment cannot be empty") == false)
+                  {
+                      comment.focus();
+                      return false;
+                  }
+              }
+          }
+          </script>
+    """ % (nospamanswer)
     print "</head>"
     print "<body>"
 
@@ -663,9 +725,10 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 print "<h3>%s</h3>" % l_no_comments_allowed
             else:
                 print "<h3><a name=\"leave_acomment\"></a>%s</h3>" % l_leave_reply
-                print "<form action=\"%s/%s/?postcomment\" method=\"post\" id=\"commentform\">" % (
+                print "<form action=\"%s/%s/?postcomment\" method=\"post\"" % (
                     baseurl,
                     entry.fileName[:-4])
+                print "id=\"commentform\" onsubmit=\"return validate_form(this)\">" # form
                 print "<input type=\"hidden\" name=\"name\" id=\"name\" value=\"%s\"/>" % entry.fileName[:-4]
                 print "<input type=\"hidden\" name=\"headline\" id=\"headline\" value=\"%s\"/>" % entry.headline
                 print "<input type=\"hidden\" name=\"commentnum\" id=\"commentnum\" value=\"%s\"/>" % (numofcomment+1)
