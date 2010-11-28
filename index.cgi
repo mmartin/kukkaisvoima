@@ -226,7 +226,7 @@ class Comment:
         return comment
 
     def getEmailMd5Sum(self):
-        return md5fun(self.email).hexdigest()
+        return md5fun(self.email.lower()).hexdigest()
 
 def pickleComment(author, email, url, comment, filename, indexdir):
     filename = filename.replace('/', '').replace('\\', '')
