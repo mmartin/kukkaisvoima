@@ -703,7 +703,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                     print "<li>"
                     if gravatarsupport:
                         print "<img style=\"padding-right:5px;\""
-                        print "src=\"http://gravatar.com/avatar/%s?s=40\" align=\"left\"/>" % (
+                        print "src=\"http://gravatar.com/avatar/%s?s=40&d=identicon\" align=\"left\"/>" % (
                             comment.getEmailMd5Sum())
                     print "<cite>%s</cite>:" % comment.getAuthorLink()
                     print "<br />"
