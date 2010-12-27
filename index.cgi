@@ -739,7 +739,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 print "<p><input type=\"text\" name=\"url\" id=\"url\" size=\"22\" tabindex=\"3\" />"
                 print "<label for=\"url\"><small>%s</small></label></p>" % l_webpage
                 print "<p><input type=\"text\" name=\"nospam\" id=\"nospam\" size=\"22\" tabindex=\"4\" />"
-                print "<label for=\"url\"><small>%s</small></label></p>" % l_nospam_question
+                print "<label for=\"nospam\"><small>%s</small></label></p>" % l_nospam_question
                 print "<p>%s</p>" % l_no_html
                 print "<p><textarea name=\"comment\" id=\"comment\" cols=\"40\" rows=\"7\" tabindex=\"4\"></textarea></p>"
                 print "<p><input name=\"submit\" type=\"submit\" id=\"submit\" tabindex=\"5\" value=\"Submit\" />"
