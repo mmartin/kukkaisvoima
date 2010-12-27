@@ -50,7 +50,7 @@ nospamanswer = '5'
 # something other than 'password'
 passwd = 'password'
 # Entry and comment Date format
-dateformat = "%a, %d %b %Y %H:%M:%S"
+dateformat = "%F %T"
 
 # Language variables
 l_archives = 'Archives'

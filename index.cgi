@@ -79,7 +79,7 @@ sidebarcomments = True
 # http://gravatar.com for more information
 gravatarsupport = True
 # Entry and comment Date format
-dateformat = "%a, %d %b %Y %H:%M:%S"
+dateformat = "%F %T"
 
 # Language variables
 l_archives = 'Archives'
@@ -765,6 +765,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
             )
         print "</div>"
     print "</div>" # content2
+
     # sidebar
     print "<div id=\"sidebar\">"
     sortedcat = catelist.keys()
