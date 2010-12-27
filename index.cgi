@@ -78,6 +78,8 @@ sidebarcomments = True
 # Gravatar support (picture in comments according to email), see
 # http://gravatar.com for more information
 gravatarsupport = True
+# Entry and comment Date format
+dateformat = "%a, %d %b %Y %H:%M:%S"
 
 # Language variables
 l_archives = 'Archives'
@@ -617,7 +619,7 @@ def renderDeleteComments(entry, commentnum):
 
     print "<br />"
     print "<small>%s</small>" % (
-        str(comment.date)[:-7])
+        strftime(dateformat, comment.date.timetuple()))
     print "<p>%s</p>" % comment.getText()
     print "</li>"
     print "</ol>"
@@ -690,7 +692,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 comma = ', '
             print "<a href=\"%s/%s\">%s</a>%s" % (baseurl, quote_plus(cat), cat, comma)
         print "</div>"
-        print "<div class=\"date\">%s: %s</div>" % (l_date, entry.date)
+        print "<div class=\"date\">%s: %s</div>" % (l_date, strftime(dateformat, entry.date.timetuple()))
 
         # comments
         if len(entries) == 1:
@@ -716,7 +718,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                     print "<small><a name =\"comment-%s\" href=\"#comment-%s\">%s</a> %s </small>" % (
                         numofcomment,
                         numofcomment,
-                        str(comment.date)[:-7],
+                        strftime(dateformat, comment.date.timetuple()),
                         delcom)
                     print "<p>%s</p>" % comment.getText()
                     print "</li>"

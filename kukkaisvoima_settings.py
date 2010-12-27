@@ -49,6 +49,8 @@ nospamanswer = '5'
 # This is admin password to manage comments. password should be
 # something other than 'password'
 passwd = 'password'
+# Entry and comment Date format
+dateformat = "%a, %d %b %Y %H:%M:%S"
 
 # Language variables
 l_archives = 'Archives'
