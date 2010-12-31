@@ -49,6 +49,14 @@ body {
     color: #693;
 }
 
+#comments {
+    list-style-type:none;
+}
+
+#comments .avatar {
+  margin-right: 0.5em;
+}
+
 a:link,
 a:visited {
     color: #326ea1;

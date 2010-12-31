@@ -699,13 +699,13 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
             numofcomment = 0
             if len(entry.comments) > 0 and maxcomments > -1:
                 print "<h3><a name=\"comments\"></a>%s</h3>" % l_comments
-                print "<ol style=\"list-style-type:none;\">"
+                print "<ol id=\"comments\">"
                 for comment in entry.comments:
                     numofcomment = numofcomment +1
                     print "<li>"
                     if gravatarsupport:
-                        print "<img style=\"padding-right:5px;\""
-                        print "src=\"http://gravatar.com/avatar/%s?s=40&d=identicon\" align=\"left\"/>" % (
+                        print "<img class=\"avatar\" align=\"left\""
+                        print "src=\"http://gravatar.com/avatar/%s?s=40&d=identicon\" />" % (
                             comment.getEmailMd5Sum())
                     print "<cite>%s</cite>:" % comment.getAuthorLink()
                     print "<br />"
@@ -751,13 +751,13 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
     if len(entries) > 1:
         print "<div class=\"navi\">"
         if page > 0:
-            print "<a href=\"%s/%s?page=%s\">%s</a>" % (
+            print "<a href=\"%s/%s?page=%s\" id=\"previous-page\">%s</a>" % (
                 baseurl,
                 '/'.join(path),
                 page-1,
                 l_previouspage
-                )        
-        print "<a href=\"%s/%s?page=%s\">%s</a>" % (
+                )
+        print "<a href=\"%s/%s?page=%s\" id=\"next-page\">%s</a>" % (
             baseurl,
             '/'.join(path),
             page+1,
