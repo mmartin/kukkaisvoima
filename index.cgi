@@ -625,7 +625,7 @@ def renderDeleteComments(entry, commentnum):
     print "</ol>"
 
     print "<p>%s</p>" % l_do_you_delete
-    print "<form action=\"%s/%s/?deletecomment\" method=\"post\" id=\"commentform\">" % (baseurl, 
+    print "<form action=\"%s/%s/?deletecomment\" method=\"post\" id=\"deleteform\">" % (baseurl,
                                                                                          quote_plus(entry.fileName[:-4]))
     print "<input type=\"hidden\" name=\"commentnum\" id=\"commentnum\" value=\"%s\"/>" % (commentnum)
     print "<input type=\"hidden\" name=\"name\" id=\"name\" value=\"%s\"/>" % entry.fileName[:-4]
@@ -782,7 +782,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
 
     # search
     print "<h2>%s</h2>" % l_search
-    print "<form action=\"%s\" method=\"get\" id=\"commentform\">" % baseurl
+    print "<form action=\"%s\" method=\"get\" id=\"searchform\">" % baseurl
     print "<input type=\"text\" name=\"search\" id=\"search\" size=\"15\" /><br />"
     print "<input type=\"submit\" value=\"%s\" />" % l_search
     print "</form>"
