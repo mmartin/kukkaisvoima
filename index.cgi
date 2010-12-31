@@ -403,58 +403,39 @@ def renderHtmlHeader(title=None, links=[]):
           <script type="text/javascript">
           function validate_not_null(field, msg)
           {
-              if (field.value == null || field.value == "")
-              {
-                  alert(msg);
-                  return false;
-              }
-              return true;
+              return (field.value != null && field.value != "");
           }
 
           function validate_email(field, msg)
           {
               at_index = field.value.indexOf("@");
-              if ((at_index > 1) && (field.value.lastIndexOf(".") > at_index))
-              {
-                  return true;
-              }
-              alert(msg);
-              return false;
+              return ((at_index > 1) && (field.value.lastIndexOf(".") > at_index));
           }
 
           function validate_nospam(field, msg)
           {
-              if (field.value == "%s")
-              {
-                  return true;
-              }
-              alert(msg);
-              return false;
+              return (field.value == "%s");
           }
 
           function validate_form(thisform)
           {
               with (thisform)
               {
-                  if (validate_not_null(author, "Name must be filled in") == false)
+                  var test = [
+                      //field   function            error message
+                      [author,  validate_not_null,  "Name must be filled in"],
+                      [email,   validate_email,     "Email must be filled in and must be valid!"],
+                      [nospam,  validate_nospam,    "Wrong answer!"],
+                      [comment, validate_not_null,  "Comment cannot be empty"]
+                  ];
+                  for (i = 0; i < 4; i++)
                   {
-                      author.focus();
-                      return false;
-                  }
-                  if (validate_email(email,"Email must be filled in and must be valid!") == false)
-                  {
-                      email.focus();
-                      return false;
-                  }
-                  if (validate_nospam(nospam, "Wrong answer!") == false)
-                  {
-                      nospam.focus();
-                      return false;
-                  }
-                  if (validate_not_null(comment, "Comment cannot be empty") == false)
-                  {
-                      comment.focus();
-                      return false;
+                      if (test[i][1](test[i][0]) == false)
+                      {
+                          alert(test[i][2]);
+                          test[i][0].focus();
+                          return false;
+                      }
                   }
               }
           }
