@@ -482,7 +482,7 @@ def renderEntryLinks(entries, text=None):
             index += 1
         link += " (%s)" % entry.date
         if text:
-            link += "</br><pre>%s</pre>" % text
+            link += "<br /><pre>%s</pre>" % text
         link += "</li>"
         print link
 
