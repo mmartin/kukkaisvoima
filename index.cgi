@@ -757,12 +757,13 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 page-1,
                 l_previouspage
                 )
-        print "<a href=\"%s/%s?page=%s\">%s</a>" % (
-            baseurl,
-            '/'.join(path),
-            page+1,
-            l_nextpage
-            )
+        if len(entries) == numberofentriesperpage:
+            print "<a href=\"%s/%s?page=%s\">%s</a>" % (
+                baseurl,
+                '/'.join(path),
+                page+1,
+                l_nextpage
+                )
         print "</div>"
     print "</div>" # content2
 
