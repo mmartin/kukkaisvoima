@@ -645,9 +645,11 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
 
     print "<div id=\"content2\">"
     for entry in entries:
+        print "<div class=\"post-whole\">"
         print "<h2><a href=\"%s\">%s</a></h2>" % (
             entry.url,
             entry.headline)
+        print "<div class=\"post-text\">"
         print "<div class=\"post\">"
         for line in entry.text:
             print line,
@@ -674,6 +676,8 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
             print "<a href=\"%s/%s\">%s</a>%s" % (baseurl, quote_plus(cat), cat, comma)
         print "</div>"
         print "<div class=\"date\">%s: %s</div>" % (l_date, strftime(dateformat, entry.date.timetuple()))
+        print "</div>" # post-text
+        print "</div>" # post-whole
 
         # comments
         if len(entries) == 1:
