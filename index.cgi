@@ -123,7 +123,7 @@ def generateDate(fileName):
     mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime = os.stat(fileName)
     filedate= datetime(*localtime(mtime)[0:6])
     date = "%s %s:%s:%s" % (date,
-                            filedate.hour, 
+                            filedate.hour,
                             filedate.minute,
                             filedate.second)
     try:
@@ -463,9 +463,9 @@ def renderEntryLinks(entries, text=None):
             index += 1
         link += " (%s)" % entry.date
         if text:
-            link += "</br><pre>%s</pre>" % text
+            link += "<br /><pre>%s</pre>" % text
         link += "</li>"
-        print link        
+        print link
 
 
 def renderCategories(catelist, ent, path):
@@ -480,7 +480,7 @@ def renderCategories(catelist, ent, path):
             sortedcat.sort()
         print "<h2>%s</h2>" % l_categories
         print "<ul>"
-        
+
         for cat in sortedcat:
             print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
                 baseurl, quote_plus(cat), cat, len(catelist[cat]))
@@ -569,7 +569,7 @@ def renderSearch(filelist, ent, searchstring):
             f.close()
         except:
             pass
-    
+
     for file in matchedfiles.iterkeys():
         pline = ""
 
@@ -742,12 +742,13 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 page-1,
                 l_previouspage
                 )
-        print "<a href=\"%s/%s?page=%s\" id=\"next-page\">%s</a>" % (
-            baseurl,
-            '/'.join(path),
-            page+1,
-            l_nextpage
-            )
+        if len(entries) == numberofentriesperpage:
+            print "<a href=\"%s/%s?page=%s\" id=\"next-page\">%s</a>" % (
+                baseurl,
+                '/'.join(path),
+                page+1,
+                l_nextpage
+                )
         print "</div>"
     print "</div>" # content2
 
@@ -912,7 +913,7 @@ def main():
         mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime = os.stat(
             os.path.join(datadir,file))
         filelist[generateDate(os.path.join(datadir,file))] = file
-    # Read the main index 
+    # Read the main index
     indexold = list()
     try:
         indexoldfile = open(os.path.join(indexdir,'main.index'), 'rb')
@@ -1045,7 +1046,7 @@ def main():
             else:
                 entries = ent.getOne("%s.txt" % unquote_plus(path[0]))
         except:
-            entries = ent.getMany(page)        
+            entries = ent.getMany(page)
     elif len(path) == 1 and deletecomment:
         # check if this is incoming comment
         fs = cgi.FieldStorage(keep_blank_values=1)
@@ -1060,7 +1061,7 @@ def main():
         try:
             entries = ent.getOne("%s.txt" % unquote_plus(path[0]))
         except:
-            entries = ent.getMany(page)        
+            entries = ent.getMany(page)
     else:
         entries = ent.getMany(page)
 
