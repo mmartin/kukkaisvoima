@@ -610,7 +610,7 @@ def renderDeleteComments(entry, commentnum):
                                                                                          quote_plus(entry.fileName[:-4]))
     print "<input type=\"hidden\" name=\"commentnum\" id=\"commentnum\" value=\"%s\"/>" % (commentnum)
     print "<input type=\"hidden\" name=\"name\" id=\"name\" value=\"%s\"/>" % entry.fileName[:-4]
-    print "<p><input type=\"password\" name=\"password\" id=\"password\" size=\"22\" tabindex=\"1\" />"
+    print "<p class=\"field\"><input type=\"password\" name=\"password\" id=\"password\" size=\"22\" tabindex=\"1\" />"
     print "<label for=\"password\"><small>%s</small></label></p>" % l_passwd
     print "<p><input name=\"submit\" type=\"submit\" id=\"submit\" tabindex=\"5\" value=\"Submit\" />"
     print "</p></form>"
@@ -715,16 +715,16 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 print "<input type=\"hidden\" name=\"name\" id=\"name\" value=\"%s\"/>" % entry.fileName[:-4]
                 print "<input type=\"hidden\" name=\"headline\" id=\"headline\" value=\"%s\"/>" % entry.headline
                 print "<input type=\"hidden\" name=\"commentnum\" id=\"commentnum\" value=\"%s\"/>" % (numofcomment+1)
-                print "<p><input type=\"text\" name=\"author\" id=\"author\" size=\"22\" tabindex=\"1\" />"
+                print "<p class=\"field\"><input type=\"text\" name=\"author\" id=\"author\" size=\"22\" tabindex=\"1\" />"
                 print "<label for=\"author\"><small>%s</small></label></p>" % l_name_needed
-                print "<p><input type=\"text\" name=\"email\" id=\"email\" size=\"22\" tabindex=\"2\" />"
+                print "<p class=\"field\"><input type=\"text\" name=\"email\" id=\"email\" size=\"22\" tabindex=\"2\" />"
                 print "<label for=\"email\"><small>%s</small></label></p>" % l_email_needed
-                print "<p><input type=\"text\" name=\"url\" id=\"url\" size=\"22\" tabindex=\"3\" />"
+                print "<p class=\"field\"><input type=\"text\" name=\"url\" id=\"url\" size=\"22\" tabindex=\"3\" />"
                 print "<label for=\"url\"><small>%s</small></label></p>" % l_webpage
-                print "<p><input type=\"text\" name=\"nospam\" id=\"nospam\" size=\"22\" tabindex=\"4\" />"
+                print "<p class=\"field\"><input type=\"text\" name=\"nospam\" id=\"nospam\" size=\"22\" tabindex=\"4\" />"
                 print "<label for=\"nospam\"><small>%s</small></label></p>" % l_nospam_question
                 print "<p>%s</p>" % l_no_html
-                print "<p><textarea name=\"comment\" id=\"comment\" cols=\"40\" rows=\"7\" tabindex=\"4\"></textarea></p>"
+                print "<p class=\"field\"><textarea name=\"comment\" id=\"comment\" cols=\"40\" rows=\"7\" tabindex=\"4\"></textarea></p>"
                 print "<p><input name=\"submit\" type=\"submit\" id=\"submit\" tabindex=\"5\" value=\"Submit\" />"
                 print "<input type=\"hidden\" name=\"comment_post_ID\" value=\"11\" />"
                 print "</p></form>"
