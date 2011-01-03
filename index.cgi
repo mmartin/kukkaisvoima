@@ -428,7 +428,7 @@ def renderHtmlHeader(title=None, links=[]):
                       [nospam,  validate_nospam,    "Wrong answer!"],
                       [comment, validate_not_null,  "Comment cannot be empty"]
                   ];
-                  for (i = 0; i < 4; i++)
+                  for (var i in test)
                   {
                       if (test[i][1](test[i][0]) == false)
                       {
