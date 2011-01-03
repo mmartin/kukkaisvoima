@@ -502,11 +502,12 @@ def renderCategories(catelist, ent, path):
         print "<ul>"
 
         for cat in sortedcat:
-            print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
+            print "<li><a href=\"%s/%s\">%s</a> (%s)" % (
                 baseurl, quote_plus(cat), cat, len(catelist[cat]))
             print "<ul>"
             renderEntryLinks(ent.getMany(-1, cat))
             print "</ul>"
+            print "</li>"
 
         print "</ul>"
     elif len(path) == 2 and path[1] in catelist.keys():
