@@ -107,6 +107,7 @@ l_search = "Search"
 l_search2 = "No matches"
 # new in version 10
 l_recent_comments = "Recent comments"
+l_recent_comments_list = "%(author)s on %(post)s"
 
 
 # import user settings
@@ -792,13 +793,15 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
         print "<h2>%s</h2>" % l_recent_comments
         comlist = getCommentList()
         if len(comlist) == 0:
-            "No comments"
+            print l_no_comments
         else:
             print "<ul>"
             for com in comlist:
-                print "<li>%s on <a href=\"%s/%s#comment-%d\">%s</a>"\
-                    % (com["authorlink"], baseurl,
-                       quote_plus(com["file"][:-4]), com["num"], com["subject"])
+                link = "<a href=\"%s/%s#comment-%d\">%s</a>" % (baseurl,
+                        quote_plus(com["file"][:-4]), com["num"], com["subject"])
+                line
+                print "<li>"
+                print l_recent_comments_list % {"author": com["authorlink"], "post": link}
                 print "</li>"
         print "</ul>"
 
