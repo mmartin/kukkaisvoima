@@ -759,21 +759,26 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
         sortedcat.sort(key=locale.strxfrm)
     except: # python < 2.4 fails
         sortedcat.sort()
+    print "<div class=\"widget\" id=\"category-widget\">"
     print "<h2><a href=\"%s/categories\">%s</a></h2>" % (baseurl, l_categories)
     print "<ul>"
     for cat in sortedcat:
         print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
             baseurl, quote_plus(cat), cat, len(catelist[cat]))
     print "</ul>"
+    print "</div>"
 
     # search
+    print "<div class=\"widget\" id=\"search-widget\">"
     print "<h2>%s</h2>" % l_search
     print "<form action=\"%s\" method=\"get\" id=\"searchform\">" % baseurl
     print "<input type=\"text\" name=\"search\" id=\"search\" size=\"15\" /><br />"
     print "<input type=\"submit\" value=\"%s\" />" % l_search
     print "</form>"
+    print "</div>"
 
     if sidebarcomments:
+        print "<div class=\"widget\" id=\"comments-widget\">"
         print "<h2>%s</h2>" % l_recent_comments
         comlist = getCommentList()
         if len(comlist) == 0:
@@ -786,8 +791,10 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                        quote_plus(com["file"][:-4]), com["num"], com["subject"])
                 print "</li>"
         print "</ul>"
+        print "</div>"
 
     # archive
+    print "<div class=\"widget\" id=\"archive-widget\">"
     print "<h2><a href=\"%s/archive\">%s</a></h2>" % (baseurl, l_archives)
     print "<ul>"
     sortedarc = arclist.keys()
@@ -797,14 +804,17 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
         print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
             baseurl, dat, dat, len(arclist[dat]))
     print "</ul>"
+    print "</div>"
 
     if len(entries) == 1:
+        print "<div class=\"widget\" id=\"admin-widget\">"
         print "<h2>%s</h2>" % l_admin
         print "<ul>"
         print "<li><a href=\"%s/%s/?admin\" rel=\"nofollow\">%s</a>" % (baseurl,
                                                                         quote_plus(entry.fileName[:-4]),
                                                                         l_admin_comments)
         print "</ul>"
+        print "</div>"
 
     print "</div>" # sidebar
 
