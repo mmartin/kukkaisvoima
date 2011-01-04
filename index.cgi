@@ -107,6 +107,7 @@ l_search = "Search"
 l_search2 = "No matches"
 # new in version 10
 l_recent_comments = "Recent comments"
+l_recent_comments_list = "%(author)s on %(post)s"
 
 
 # import user settings
@@ -482,11 +483,12 @@ def renderCategories(catelist, ent, path):
         print "<ul>"
 
         for cat in sortedcat:
-            print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
+            print "<li><a href=\"%s/%s\">%s</a> (%s)" % (
                 baseurl, quote_plus(cat), cat, len(catelist[cat]))
             print "<ul>"
             renderEntryLinks(ent.getMany(-1, cat))
             print "</ul>"
+            print "</li>"
 
         print "</ul>"
     elif len(path) == 2 and path[1] in catelist.keys():
@@ -515,6 +517,7 @@ def renderArchive(ent):
 def renderSearch(filelist, ent, searchstring):
     renderHtmlHeader(l_search)
     print "<div id=\"content3\">"
+    print "<h2>%s</h2>" % l_search
 
     # Remove some special character so that one don't exhaust the web
     # host with stupid .*? searches
@@ -570,15 +573,17 @@ def renderSearch(filelist, ent, searchstring):
         except:
             pass
 
-    for file in matchedfiles.iterkeys():
-        pline = ""
-
-        for line in matchedfiles[file]:
-            pline += line
-        renderEntryLinks(list(ent.getOne(file)), pline)
-
     if len(matchedfiles) == 0: # no matches
         print l_search2
+    else:
+        print "<ul>"
+        for file in matchedfiles.iterkeys():
+            pline = ""
+
+            for line in matchedfiles[file]:
+                pline += line
+            renderEntryLinks(list(ent.getOne(file)), pline)
+        print "</ul>"
 
     print "</div>" # content3
     renderHtmlFooter()
@@ -782,13 +787,15 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
         print "<h2>%s</h2>" % l_recent_comments
         comlist = getCommentList()
         if len(comlist) == 0:
-            "No comments"
+            print l_no_comments
         else:
             print "<ul>"
             for com in comlist:
-                print "<li>%s on <a href=\"%s/%s#comment-%d\">%s</a>"\
-                    % (com["authorlink"], baseurl,
-                       quote_plus(com["file"][:-4]), com["num"], com["subject"])
+                link = "<a href=\"%s/%s#comment-%d\">%s</a>" % (baseurl,
+                        quote_plus(com["file"][:-4]), com["num"], com["subject"])
+                line
+                print "<li>"
+                print l_recent_comments_list % {"author": com["authorlink"], "post": link}
                 print "</li>"
         print "</ul>"
         print "</div>"

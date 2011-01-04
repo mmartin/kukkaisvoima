@@ -76,3 +76,7 @@ l_do_you_delete = 'Your about to delete comment this, are you sure you want to t
 # new in version 8
 l_search = "Search"
 l_search2 = "No matches"
+# new in version 10
+l_recent_comments = "Recent comments"
+l_recent_comments_list = "%(author)s on %(post)s"
+
