@@ -803,7 +803,6 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
             for com in comlist:
                 link = "<a href=\"%s/%s#comment-%d\">%s</a>" % (baseurl,
                         quote_plus(com["file"][:-4]), com["num"], com["subject"])
-                line
                 print "<li>"
                 print l_recent_comments_list % {"author": com["authorlink"], "post": link}
                 print "</li>"
