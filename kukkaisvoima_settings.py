@@ -81,4 +81,5 @@ l_search2 = "No matches"
 # new in version 10
 l_recent_comments = "Recent comments"
 l_recent_comments_list = "%(author)s on %(post)s"
+l_footer = "Powered by %(link)s version %(version)s"
 

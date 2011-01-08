@@ -110,6 +110,7 @@ l_search2 = "No matches"
 # new in version 10
 l_recent_comments = "Recent comments"
 l_recent_comments_list = "%(author)s on %(post)s"
+l_footer = "Powered by %(link)s version %(version)s"
 
 
 # import user settings
@@ -378,7 +379,10 @@ class Entries:
         return ents
 
 def renderHtmlFooter():
-    print "<div id=\"footer\">Powered by <a href=\"http://23.fi/kukkaisvoima\">Kukkaisvoima</a> version %s</div>" % version
+    print "<div id=\"footer\">"
+    print l_footer % {'link': "<a href=\"http://23.fi/kukkaisvoima\">Kukkaisvoima</a>",
+      'version': version}
+    print "</div>" # footer
     print "</div>" # content1
     print "</body>"
     print "</html>"
