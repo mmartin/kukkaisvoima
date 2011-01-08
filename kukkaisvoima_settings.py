@@ -51,6 +51,8 @@ nospamanswer = '5'
 passwd = 'password'
 # Entry and comment Date format
 dateformat = "%F %T"
+# Sidebar Archive Date format
+archivedateformat = "%Y-%m"
 
 # Language variables
 l_archives = 'Archives'

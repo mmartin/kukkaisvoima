@@ -80,6 +80,8 @@ sidebarcomments = True
 gravatarsupport = True
 # Entry and comment Date format
 dateformat = "%F %T"
+# Sidebar Archive Date format
+archivedateformat = "%Y-%m"
 
 # Language variables
 l_archives = 'Archives'
@@ -815,8 +817,9 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
     sortedarc.sort()
     sortedarc.reverse()
     for dat in sortedarc:
-        print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
-            baseurl, dat, dat, len(arclist[dat]))
+        print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (baseurl, dat,
+            strftime(archivedateformat, arclist[dat].keys()[0].timetuple()),
+            len(arclist[dat]))
     print "</ul>"
 
     if len(entries) == 1:
