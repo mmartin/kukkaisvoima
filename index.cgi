@@ -107,6 +107,7 @@ l_search = "Search"
 l_search2 = "No matches"
 # new in version 10
 l_recent_comments = "Recent comments"
+l_notify_comments= "Notify me of follow-up comments via email."
 
 
 # import user settings
@@ -141,8 +142,7 @@ def generateDate(fileName):
 def sendEmail(to, subject, message):
     msg = MIMEText(_text=wrapEmail(message), _charset='charset=%s' % encoding)
     msg['subject'] = subject
-    sender = 'Kukkaisvoima (%s) <%s>' % (baseurl, blogemail)
-    msg['from'] = sender
+    sender = 'Kukkaisvoima blog (%s) <%s>' % (baseurl, blogemail)
     s = smtplib.SMTP()
     s.connect()
     s.sendmail(sender, to, msg.as_string())
@@ -197,12 +197,13 @@ def removeHtmlTags(line):
 
 class Comment:
     urlre = re.compile('(http|https|ftp)://([A-Za-z0-9/:@_%~#=&\.\-\?\+]+)')
-    def __init__(self, author, email, url, comment):
+    def __init__(self, author, email, url, comment, subscribe):
         self.author = author
         self.email = email
         self.url = url
         self.comment = comment
         self.date = datetime.now()
+        self.subscribe = subscribe
 
     def getUrl(self):
         url = self.url
@@ -230,7 +231,17 @@ class Comment:
     def getEmailMd5Sum(self):
         return md5fun(self.email.lower()).hexdigest()
 
-def pickleComment(author, email, url, comment, filename, indexdir):
+    def getSubEmail(self):
+        try:
+            if self.subscribe is None:
+                return None
+            else:
+                return self.email
+        except:
+            return None
+
+
+def pickleComment(author, email, url, comment, filename, indexdir, subscribe):
     filename = filename.replace('/', '').replace('\\', '')
     filename = "%s.txt" % filename
     # read the old comments
@@ -241,7 +252,7 @@ def pickleComment(author, email, url, comment, filename, indexdir):
         oldcommentsfile.close()
     except:
         pass
-    comments.append(Comment(author, email, url, comment))
+    comments.append(Comment(author, email, url, comment, subscribe))
     commentfile = open(os.path.join(indexdir,'comment-%s' % filename), 'wb')
     pickle.dump(comments, commentfile)
     commentfile.close()
@@ -312,6 +323,15 @@ def updateCommentList():
     pickle.dump(commentlist, commentfile)
     commentfile.close()
 
+
+def getSubscribedEmails(comments):
+    """Get list of email subscriptions from comment list. No
+       duplicate email"""
+    emails = dict()
+    for com in comments:
+        email = com.getSubEmail()
+        emails[email] = 1
+    return emails.keys()
 
 class Entry:
     def __init__(self, fileName, datadir):
@@ -746,7 +766,9 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 print "<p><textarea name=\"comment\" id=\"comment\" cols=\"40\" rows=\"7\" tabindex=\"4\"></textarea></p>"
                 print "<p><input name=\"submit\" type=\"submit\" id=\"submit\" tabindex=\"5\" value=\"Submit\" />"
                 print "<input type=\"hidden\" name=\"comment_post_ID\" value=\"11\" />"
-                print "</p></form>"
+                print "</p>"
+                print "<p><input type=\"checkbox\" name=\"subscribe\" id=\"subscribe\" tabindex=\"6\" value=\"subscribe\">%s</label></p>" % l_notify_comments
+                print "</form>"
 
     if len(entries) > 1:
         print "<div class=\"navi\">"
@@ -1038,25 +1060,50 @@ def main():
             commentnum = fs.getvalue('commentnum')
             headline = fs.getvalue('headline')
             nospam = fs.getvalue('nospam')
+            subscribe = fs.getvalue('subscribe')
             filename = "%s.txt" % name
-            if author and email and comment and name and commentnum and maxcomments > -1 and len(getComments(filename)) < maxcomments and nospam == nospamanswer:
+            comments_for_entry = getComments(filename)
+
+            # save and send only valid comments
+            if author and email and comment and \
+                    name and commentnum and \
+                    maxcomments > -1 and \
+                    len(comments_for_entry) < maxcomments and \
+                    nospam == nospamanswer:
                 # remove html tags
                 comment = comment.replace('<','[')
                 comment = comment.replace('>',']')
-                pickleComment(author, email, url, comment, name, indexdir)
+                pickleComment(author, email, url, comment, name, indexdir, subscribe)
+
+                email_subject = 'New comment in %s' % headline
+                email_body = '%s <%s>:\n\n%s\n\nlink:\n%s/%s#comment-%s' \
+                    % (author, email, comment, baseurl, name, commentnum)
+
+                # notify blog owner and comment subscribers about the
+                # new comment. Email sending may fail for some reason,
+                # so try sending one email at time.
                 try:
-                    comment = 'New comment in %s\n%s <%s>:\n\n%s\n\nlink:\n%s/%s#comment-%s' % (
-                        headline,
-                        author,
-                        email,
-                        comment,
-                        baseurl,
-                        name,
-                        commentnum)
-                    sendEmail(blogemail, 'New comment', comment)
+                    email_body_admin = email_body
+                    if subscribe:
+                        email_body_admin += \
+                            "\n\nNote: commenter subscribed to follow-up comments"
+                    sendEmail(blogemail, email_subject, email_body_admin)
                 except:
                     pass # just fail silently
-                print 'Location: %s/%s\n' % (baseurl, name)
+
+                # add disclaimer for subscribers
+                email_body += \
+                    "\n\n******\nYou are receiving this because you have signed up for email notifications. "
+                email_body += \
+                    "In case of misuse contact blog owner at %s" % blogemail
+
+                for subscribe_email in getSubscribedEmails(comments_for_entry):
+                    try:
+                        sendEmail(subscribe_email, email_subject, email_body)
+                    except:
+                        pass # just fail silently
+
+                print 'Location: %s/%s#comment-%s\n' % (baseurl, name, commentnum)
                 return
             else:
                 entries = ent.getOne("%s.txt" % unquote_plus(path[0]))
