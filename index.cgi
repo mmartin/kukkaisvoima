@@ -743,7 +743,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                     print "<p>%s</p>" % comment.getText()
                     print "</li>"
                 print "</ol>"
-            if maxcomments == -1:
+            if maxcomments == -1 or len(entry.comments) >= maxcomments:
                 print "<h3>%s</h3>" % l_no_comments_allowed
             else:
                 print "<h3><a name=\"leave_acomment\"></a>%s</h3>" % l_leave_reply
