@@ -115,7 +115,7 @@ l_notify_comments= "Notify me of follow-up comments via email."
 from kukkaisvoima_settings import *
 
 # version
-version = '10beta2'
+version = '10'
 
 # for date collisions
 dates = {}
