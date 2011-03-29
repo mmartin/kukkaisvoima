@@ -272,8 +272,11 @@ def pickleComment(author, email, url, comment, filename, indexdir, subscribe):
 
 def getComments(filename):
     comments = list()
+    comm_file = os.path.join(indexdir,'comment-%s' % filename)
+    if os.path.exists(comm_file) is False:
+        return comments
     try:
-        oldcommentsfile = open(os.path.join(indexdir,'comment-%s' % filename), 'rb')
+        oldcommentsfile = open(comm_file, 'rb')
         comments = pickle.load(oldcommentsfile)
         oldcommentsfile.close()
     except:
@@ -1054,10 +1057,8 @@ def main():
 
     filelist = {}
     for file in entries:
-        # FIXME why is this os.stat here?
-        mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime = os.stat(
-            os.path.join(datadir,file))
         filelist[generateDate(os.path.join(datadir,file))] = file
+
     # Read the main index
     indexold = list()
     try:
