@@ -399,12 +399,12 @@ def handleIncomingComment(fs):
 
     comm_url = new_comment.getUrl()
     if comm_url:
-        comm_url = " %s" % comm_url
+        comm_url = "\nWebsite: %s" % comm_url
     else:
         comm_url = ""
 
     email_subject = 'New comment in %s' % headline
-    email_body = '%s%s:\n\n%s\n\nlink:\n%s/%s#comment-%s' \
+    email_body = 'Name: %s%s\n\n%s\n\nlink:\n%s/%s#comment-%s' \
         % (author, comm_url, comment, baseurl, name, commentnum)
 
     # notify blog owner and comment subscribers about the
