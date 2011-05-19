@@ -115,7 +115,7 @@ l_notify_comments= "Notify me of follow-up comments via email."
 from kukkaisvoima_settings import *
 
 # version
-version = '10'
+version = '11dev'
 
 # for date collisions
 dates = {}
@@ -141,7 +141,7 @@ def generateDate(fileName):
     return date
 
 def sendEmail(to, subject, message):
-    msg = MIMEText(_text=wrapEmail(message), _charset='charset=%s' % encoding)
+    msg = MIMEText(_text=wrapEmail(message), _charset='%s' % encoding)
     msg['subject'] = subject
     sender = 'Kukkaisvoima blog (%s) <%s>' % (baseurl, blogemail)
     s = smtplib.SMTP()
