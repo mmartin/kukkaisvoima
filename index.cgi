@@ -81,6 +81,8 @@ sidebarcomments = True
 gravatarsupport = True
 # Entry and comment Date format
 dateformat = "%F %T"
+# Show only first paragraph when showing many entries
+entrysummary = False
 
 # Language variables
 l_archives = 'Archives'
@@ -109,6 +111,8 @@ l_search2 = "No matches"
 # new in version 10
 l_recent_comments = "Recent comments"
 l_notify_comments= "Notify me of follow-up comments via email."
+# new in version 11
+l_read_more = "..."
 
 
 # import user settings
@@ -440,6 +444,8 @@ def handleIncomingComment(fs):
     return 'Location: %s/%s#comment-%s\n' % (baseurl, name, commentnum)
 
 class Entry:
+    firstpre = re.compile("<p.*?(</p>|<p>)", re.DOTALL | re.IGNORECASE)
+    whitespacere = re.compile("\s")
     def __init__(self, fileName, datadir):
         self.fileName = fileName
         self.fullPath = os.path.join(datadir, fileName)
@@ -455,6 +461,38 @@ class Entry:
         self.comments = getComments(self.fileName)
         self.url = "%s/%s" % (baseurl,
                               quote_plus(self.fileName[:-4]))
+
+    def getFirstParagraph(self):
+        # look for <p>
+        text_as_str = "".join(self.text)
+        m = self.firstpre.search(text_as_str)
+        if m is not None:
+            there_is_more = False
+            there_is_more_str = "<a href=\"%s\">%s</a>" % \
+                (self.url, l_read_more)
+            first_paragraph = m.group().split("\n")
+            text_as_str = re.sub(self.whitespacere, '', text_as_str)
+            first_paragraph_as_string = re.sub(self.whitespacere, '', m.group())
+            lastline = first_paragraph.pop()
+            lastline.strip()
+            if len(text_as_str) > len(first_paragraph_as_string):
+                there_is_more = True
+            if there_is_more and lastline.lower().endswith("</p>"):
+                lastline = lastline[:-4] # removes the </p>
+                there_is_more_str = there_is_more_str + "</p>"
+            if there_is_more: # and tip that there is still more to this entry
+                lastline = lastline + there_is_more_str
+            first_paragraph.append(lastline)
+            return first_paragraph
+        else:
+            return self.text
+
+    def getText(self, summary):
+        if summary == True:
+            return self.getFirstParagraph()
+        else:
+            return self.text
+
 
 class Entries:
     def __init__(self, indexdir):
@@ -771,11 +809,14 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
 
     # title
     title = None
+    summary = False
     if len(entries) == 1:
         title = entries[0].headline
     elif category:
         title = path[0]
 
+    if len(entries) > 1:
+        summary = entrysummary
 
     rss = list()
 
@@ -794,7 +835,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
             entry.url,
             entry.headline)
         print "<div class=\"post\">"
-        for line in entry.text:
+        for line in entry.getText(summary):
             print line,
         print "</div>"
 

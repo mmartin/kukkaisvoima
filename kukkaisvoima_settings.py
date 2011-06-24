@@ -51,6 +51,8 @@ nospamanswer = '5'
 passwd = 'password'
 # Entry and comment Date format
 dateformat = "%F %T"
+# Show only first paragraph when showing many entries
+entrysummary = False
 
 # Language variables
 l_archives = 'Archives'
