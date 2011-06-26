@@ -200,6 +200,50 @@ def removeHtmlTags(line):
     return line
 
 
+def search(pattern, lines):
+    matchlines = list()
+    linenumber = 0
+    for line in lines:
+        m = pattern.search(line)
+        # we don't want to process every line, so remove html
+        # from only those lines that match our search
+        if m:
+            line = removeHtmlTags(line)
+            # match again since the line has changed
+            line = line.strip()
+            m = pattern.search(line)
+            if not m:
+                continue
+            # even the line out with ..starting match ending...
+            linelength = 74
+            startline = line[:m.start()]
+            middleline = line[m.start():m.end()]
+            endline = line[m.end():].rstrip()
+            tokenlength = (linelength - len(middleline))/2
+
+            if len(startline) >= tokenlength and len(endline) >= tokenlength:
+                startline = startline[-tokenlength:]
+                endline = endline[:tokenlength]
+            elif len(startline) < tokenlength and len(endline) < tokenlength:
+                pass
+            elif len(startline) < tokenlength:
+                endline = endline[:tokenlength + (tokenlength - len(startline))]
+            elif len(endline) < tokenlength:
+                actual_le = tokenlength + (tokenlength - len(endline))
+                startline = startline[-actual_le:]
+
+            startline = "..." + startline.lstrip()
+            endline = endline.rstrip() + "..."
+
+            matchlines.append("%04d: %s<div id=\"hit\">%s</div>%s\n" %(
+                    linenumber,
+                    startline,
+                    middleline,
+                    endline))
+        linenumber += 1
+    return matchlines
+
+
 class Comment:
     urlre = re.compile('(http|https|ftp)://([A-Za-z0-9/:@_%~#=&\.\-\?\+]+)')
     def __init__(self, author, email, url, comment, subscribe):
@@ -487,7 +531,7 @@ class Entry:
         else:
             return self.text
 
-    def getText(self, summary):
+    def getText(self, summary=False):
         if summary == True:
             return self.getFirstParagraph()
         else:
@@ -634,7 +678,37 @@ def renderHtmlHeader(title=None, links=[]):
     print "</div>" #header
 
 
-def renderEntryLinks(entries, text=None):
+def renderComment(entry, comment, numofcomment,
+                  admin=False, pretext=False):
+    print "<li>"
+    if gravatarsupport:
+        print "<img style=\"padding-right:5px;\""
+        print "src=\"http://gravatar.com/avatar/%s?s=40&d=identicon\" align=\"left\"/>" % (
+            comment.getEmailMd5Sum())
+    print "<cite>%s</cite>:" % comment.getAuthorLink()
+    print "<br />"
+    delcom = ""
+    if admin:
+        delcom = "<a href=\"%s/%s/?delcomment=%s\">(%s)</a>" % \
+            (baseurl,
+             quote_plus(entry.fileName[:-4]),
+             numofcomment,
+             l_delete_comment)
+    print "<small><a name =\"comment-%s\" href=\"%s#comment-%s\">%s</a> %s </small>" % \
+        (numofcomment,
+         entry.url,
+         numofcomment,
+         strftime(dateformat, comment.date.timetuple()),
+         delcom)
+    if pretext:
+        print "<pre>%s</pre>" % pretext
+    else:
+        print "<p>%s</p>" % comment.getText()
+    print "</li>"
+
+
+def renderEntryLinks(entries, text=None, comment_tuple_list=None):
+    # renders also some comments for search results
     for entry in entries:
         link = "<li><a href=\"%s\">%s</a>" % (
             entry.url, entry.headline)
@@ -647,8 +721,17 @@ def renderEntryLinks(entries, text=None):
         link += " (%s)" % entry.date
         if text:
             link += "<br /><pre>%s</pre>" % text
-        link += "</li>"
         print link
+        if comment_tuple_list:
+            print "<ol style=\"list-style-type:none;\">"
+            numofcomment = 0
+            for comment, ctext in comment_tuple_list:
+                numofcomment = numofcomment +1
+                if len(ctext) == 0:
+                    continue
+                renderComment(entry, comment, numofcomment, False, ctext)
+            print "</ol>"
+        print "</li>"
 
 
 def renderCategories(catelist, ent, path):
@@ -695,7 +778,7 @@ def renderArchive(ent):
     return
 
 
-def renderSearch(filelist, ent, searchstring):
+def renderSearch(entries, searchstring):
     renderHtmlHeader(l_search)
     print "<div id=\"content3\">"
 
@@ -705,60 +788,35 @@ def renderSearch(filelist, ent, searchstring):
         searchstring = searchstring.replace(i,"")
 
     pattern = re.compile(searchstring, re.IGNORECASE)
-
     matchedfiles = {}
-    for file in filelist.itervalues():
-        try:
-            f = open(os.path.join(datadir,file), "r")
-            linenumber = 0
-            for line in f.readlines():
-                m = pattern.search(line)
-                # we don't want to process every line, so remove html
-                # from only those lines that match our search
-                if m:
-                    line = removeHtmlTags(line)
-                    # match again since the line has changed
-                    line = line.strip()
-                    m = pattern.search(line)
-                    if not m:
-                        continue
-                    if not matchedfiles.has_key(file):
-                        matchedfiles[file] = list()
+    for entry in entries:
+        # first search in the entry
+        matchedfiles[entry] = dict()
+        matchedfiles[entry]["lines"] = search(pattern, entry.getText())
+        # then from the entry's comments
+        matchedfiles[entry]["comments"] = dict()
+        comments_matches = False
+        for comment in entry.comments:
+            mlines = search(pattern, comment.comment.splitlines())
+            if len(mlines) > 0:
+                comments_matches = True
+            matchedfiles[entry]["comments"][comment] = mlines
+        if len(matchedfiles[entry]["lines"]) == 0 and \
+                comments_matches == False:
+            # remove entries with no matches in text or in comments
+            del(matchedfiles[entry])
 
-                    # even the line out with ..starting match ending...
-                    linelength = 100
-                    startline = line[:m.start()]
-                    middleline = line[m.start():m.end()]
-                    endline = line[m.end():].rstrip()
-                    tokenlegth = (linelength - len(middleline))/2
-                    el = 0
-                    sl = tokenlegth - len(startline)
-                    if sl <= 0:
-                        sl = tokenlegth
-                        el = tokenlegth
-                    else: # sl > 0
-                        el = tokenlegth + (tokenlegth - sl)
-                    if sl == tokenlegth and len(startline) > 0:
-                        startline = "...%s" % startline[-sl:]
-                    if len(endline) > el:
-                        endline = "%s..." % endline[:el]
-
-                    matchedfiles[file].append("%04d: %s<div id=\"hit\">%s</div>%s\n" %(
-                            linenumber,
-                            startline,
-                            middleline,
-                            endline))
-                linenumber += 1
-            f.close()
-        except:
-            pass
-
-    for file in matchedfiles.iterkeys():
+    for entry in matchedfiles.iterkeys():
+        com_list = list()
+        for comment in matchedfiles[entry]["comments"].iterkeys():
+            pline = ""
+            for line in matchedfiles[entry]["comments"][comment]:
+                pline += line
+            com_list.append((comment, pline))
         pline = ""
-
-        for line in matchedfiles[file]:
+        for line in matchedfiles[entry]["lines"]:
             pline += line
-        renderEntryLinks(list(ent.getOne(file)), pline)
+        renderEntryLinks([entry], pline, com_list)
 
     if len(matchedfiles) == 0: # no matches
         print l_search2
@@ -869,26 +927,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 print "<ol style=\"list-style-type:none;\">"
                 for comment in entry.comments:
                     numofcomment = numofcomment +1
-                    print "<li>"
-                    if gravatarsupport:
-                        print "<img style=\"padding-right:5px;\""
-                        print "src=\"http://gravatar.com/avatar/%s?s=40&d=identicon\" align=\"left\"/>" % (
-                            comment.getEmailMd5Sum())
-                    print "<cite>%s</cite>:" % comment.getAuthorLink()
-                    print "<br />"
-                    delcom = ""
-                    if admin:
-                        delcom = "<a href=\"%s/%s/?delcomment=%s\">(%s)</a>" % (baseurl,
-                                                                                quote_plus(entry.fileName[:-4]),
-                                                                                numofcomment,
-                                                                                l_delete_comment)
-                    print "<small><a name =\"comment-%s\" href=\"#comment-%s\">%s</a> %s </small>" % (
-                        numofcomment,
-                        numofcomment,
-                        strftime(dateformat, comment.date.timetuple()),
-                        delcom)
-                    print "<p>%s</p>" % comment.getText()
-                    print "</li>"
+                    renderComment(entry, comment, numofcomment, admin)
                 print "</ol>"
             if maxcomments == -1 or len(entry.comments) >= maxcomments:
                 print "<h3>%s</h3>" % l_no_comments_allowed
@@ -1187,7 +1226,7 @@ def main():
     if len(path) >= 1 and path[0] == "categories":
         return renderCategories(categorieslist, ent, path)
     elif len(path) == 1 and search == True and searchstring != "":
-        return renderSearch(filelist, ent, unquote_plus(searchstring))
+        return renderSearch(ent.getMany(-1), unquote_plus(searchstring))
     elif len(path) >= 1 and path[0] in categorieslist.keys():
         try:
             entries = ent.getMany(page, path[0])
