@@ -8,7 +8,21 @@ headline html markup can be used for the actual blog entry.<p>
 	<li>And this<li>
 </ul>
 
-<p>Remember to change the config variables in index.cgi, otherwise
-links and comments wont work!</p>
+<p>Remember to change the config variables in
+kukkaisvoima_settings.py, otherwise links and comments wont work!</p>
+
+<p>Note also that kukkaisvoima_settings.py file contains sensitive
+information and you should block all access to it from public web. For
+example when using <a href="http://httpd.apache.org/">Apache HTTP
+server</a> the following rule could be added to .htaccess file in the
+Kukkaisvoima directory:</p>
+
+<pre>
+&lt;files kukkaisvoima_settings.py&gt;
+ order allow,deny
+ deny from all
+&lt;/files&gt;
+</pre>
+
 
 <p>Have fun!</p>
