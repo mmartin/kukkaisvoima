@@ -961,12 +961,12 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
         print "<h2>%s</h2>" % l_recent_comments
         comlist = getCommentList()
         if len(comlist) == 0:
-            "No comments"
+            print "No comments yet"
         else:
             print "<ul>"
             for com in comlist:
                 print "<li>%s on <a href=\"%s/%s#comment-%d\">%s</a>"\
-                    % (com["authorlink"], baseurl,
+                    % (com["author"], baseurl,
                        quote_plus(com["file"][:-4]), com["num"], com["subject"])
                 print "</li>"
         print "</ul>"
