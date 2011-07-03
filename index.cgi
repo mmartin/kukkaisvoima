@@ -279,6 +279,9 @@ class Comment:
                                  comment)
         return comment
 
+    def getFirstLine(self):
+        return self.getText().split("<br />")[0]
+
     def getEmailMd5Sum(self):
         return md5fun(self.email.lower()).hexdigest()
 
@@ -701,7 +704,7 @@ def renderComment(entry, comment, numofcomment,
          strftime(dateformat, comment.date.timetuple()),
          delcom)
     if pretext:
-        print "<pre>%s</pre>" % pretext
+        print pretext
     else:
         print "<p>%s</p>" % comment.getText()
     print "</li>"
@@ -725,10 +728,19 @@ def renderEntryLinks(entries, text=None, comment_tuple_list=None):
         if comment_tuple_list:
             print "<ol style=\"list-style-type:none;\">"
             numofcomment = 0
-            for comment, ctext in comment_tuple_list:
+            for comment, ctext, author in comment_tuple_list:
                 numofcomment = numofcomment +1
-                if len(ctext) == 0:
+                if len(ctext) == 0 and len(author) == 0:
                     continue
+                if len(ctext) == 0 and len(author) > 0:
+                    comm_text = comment.getFirstLine()
+                    comm_text = removeHtmlTags(comm_text)
+                    three_dots = ""
+                    if len(comm_text) > (60):
+                        three_dots = "..."
+                    ctext = "<p>%s%s</p>" % (comm_text[:60], three_dots)
+                elif len(ctext) > 0:
+                    ctext = "<pre>%s</pre>" % ctext
                 renderComment(entry, comment, numofcomment, False, ctext)
             print "</ol>"
         print "</li>"
@@ -798,9 +810,12 @@ def renderSearch(entries, searchstring):
         comments_matches = False
         for comment in entry.comments:
             mlines = search(pattern, comment.comment.splitlines())
-            if len(mlines) > 0:
+            author = search(pattern, comment.author.splitlines())
+            if len(mlines) > 0 or len(author) > 0:
                 comments_matches = True
-            matchedfiles[entry]["comments"][comment] = mlines
+            matchedfiles[entry]["comments"][comment] = dict()
+            matchedfiles[entry]["comments"][comment]["lines"] = mlines
+            matchedfiles[entry]["comments"][comment]["author"] = author
         if len(matchedfiles[entry]["lines"]) == 0 and \
                 comments_matches == False:
             # remove entries with no matches in text or in comments
@@ -810,9 +825,10 @@ def renderSearch(entries, searchstring):
         com_list = list()
         for comment in matchedfiles[entry]["comments"].iterkeys():
             pline = ""
-            for line in matchedfiles[entry]["comments"][comment]:
+            for line in matchedfiles[entry]["comments"][comment]["lines"]:
                 pline += line
-            com_list.append((comment, pline))
+            com_list.append((comment, pline,
+                             matchedfiles[entry]["comments"][comment]["author"]))
         pline = ""
         for line in matchedfiles[entry]["lines"]:
             pline += line
