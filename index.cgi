@@ -805,6 +805,7 @@ def renderSearch(entries, searchstring):
         # first search in the entry
         matchedfiles[entry] = dict()
         matchedfiles[entry]["lines"] = search(pattern, entry.getText())
+        matchedfiles[entry]["headline"] = search(pattern, [entry.headline])
         # then from the entry's comments
         matchedfiles[entry]["comments"] = dict()
         comments_matches = False
@@ -817,6 +818,7 @@ def renderSearch(entries, searchstring):
             matchedfiles[entry]["comments"][comment]["lines"] = mlines
             matchedfiles[entry]["comments"][comment]["author"] = author
         if len(matchedfiles[entry]["lines"]) == 0 and \
+                len(matchedfiles[entry]["headline"]) == 0 and \
                 comments_matches == False:
             # remove entries with no matches in text or in comments
             del(matchedfiles[entry])
