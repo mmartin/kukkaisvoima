@@ -612,6 +612,7 @@ def renderHtmlHeader(title=None, links=[]):
     # Javascript. Used to validate comment form, nice eh :P
     print """
           <script type="text/javascript">
+          /* <![CDATA[ */
           function validate_not_null(field, msg)
           {
               if (field.value == null || field.value == "")
@@ -669,6 +670,7 @@ def renderHtmlHeader(title=None, links=[]):
                   }
               }
           }
+          /* ]]> */
           </script>
     """ % (nospamanswer)
     print "</head>"
