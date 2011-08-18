@@ -1026,7 +1026,7 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                     % (com["author"], baseurl,
                        quote_plus(com["file"][:-4]), com["num"], com["subject"])
                 print "</li>"
-        print "</ul>"
+            print "</ul>"
 
     # archive
     print "<h2><a href=\"%s/archive\">%s</a></h2>" % (baseurl, l_archives)
