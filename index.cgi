@@ -119,7 +119,7 @@ l_read_more = "..."
 from kukkaisvoima_settings import *
 
 # version
-version = '11dev'
+version = '11'
 
 # for date collisions
 dates = {}
