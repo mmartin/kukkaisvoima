@@ -113,13 +113,15 @@ l_recent_comments = "Recent comments"
 l_notify_comments= "Notify me of follow-up comments via email."
 # new in version 11
 l_read_more = "..."
+# new in version 12
+l_toggle = "Click year to show months"
 
 
 # import user settings
 from kukkaisvoima_settings import *
 
 # version
-version = '11'
+version = '12dev'
 
 # for date collisions
 dates = {}
@@ -613,6 +615,20 @@ def renderHtmlHeader(title=None, links=[]):
     print """
           <script type="text/javascript">
           /* <![CDATA[ */
+
+          function toggle_years(id)
+          {
+              var elem = document.getElementById(id);
+              if (elem.style.display != 'none')
+              {
+                  elem.style.display = 'none';
+              }
+              else
+              {
+                  elem.style.display = '';
+              }
+          }
+
           function validate_not_null(field, msg)
           {
               if (field.value == null || field.value == "")
@@ -1032,13 +1048,33 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
 
     # archive
     print "<h2><a href=\"%s/archive\">%s</a></h2>" % (baseurl, l_archives)
+    print l_toggle
     print "<ul>"
     sortedarc = arclist.keys()
     sortedarc.sort()
     sortedarc.reverse()
-    for dat in sortedarc:
-        print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
-            baseurl, dat, dat, len(arclist[dat]))
+
+    # get years from archive and sort them
+    years = dict()
+    for d in sortedarc:
+        year = d.split("-", 1)[0]
+        if years.has_key(year) is False:
+            years[year] = list()
+        years[year].append(d)
+    years_keys = years.keys()
+    years_keys.sort()
+    years_keys.reverse()
+
+    # display each year at top lovel and if visiability is toggled
+    # then show months
+    for year in years_keys:
+        print "<li><a href=\"#\" onclick=\"toggle_years('con-year-%s'); return false;\">%s (%d)</a>" %\
+            (year, year, len(years[year]))
+        print "<ul id=\"con-year-%s\" style=\"display:none;\">" % year
+        for dat in years[year]:
+            print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
+                baseurl, dat, dat, len(arclist[dat]))
+        print "</ul></li>"
     print "</ul>"
 
     if len(entries) == 1:
