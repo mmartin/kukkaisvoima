@@ -795,12 +795,13 @@ def renderCategories(catelist, ent, path):
 
 
 def renderArchive(ent):
+    entries = ent.getMany(-1)
     renderHtmlHeader(l_archives)
     print "<div id=\"content3\">"
 
-    print "<h2>%s</h2>" % l_archives
+    print "<h2>%s (%d)</h2>" % (l_archives, len(entries))
     print "<ul>"
-    renderEntryLinks(ent.getMany(-1))
+    renderEntryLinks(entries)
     print "</ul>"
 
     print "</div>" # content3
@@ -1047,7 +1048,10 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
             print "</ul>"
 
     # archive
-    print "<h2><a href=\"%s/archive\">%s</a></h2>" % (baseurl, l_archives)
+    print "<h2><a href=\"%s/archive\">%s</a> (%d)</h2>" % \
+        (baseurl, l_archives,
+         # total number of entries
+         sum([len(l) for l in [i for i in arclist.itervalues()]]))
     print l_toggle
     print "<ul>"
     sortedarc = arclist.keys()
@@ -1068,8 +1072,11 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
     # display each year at top lovel and if visiability is toggled
     # then show months
     for year in years_keys:
-        print "<li><a href=\"#\" onclick=\"toggle_years('con-year-%s'); return false;\">%s (%d)</a>" %\
-            (year, year, len(years[year]))
+        print "<li><a href=\"#\" onclick=\"toggle_years('con-year-%s'); return false;\">%s</a> (%d)" %\
+            (year, year,
+             # number of entries per year
+             sum([len(arclist[dat]) for dat in years[year]]))
+
         print "<ul id=\"con-year-%s\" style=\"display:none;\">" % year
         for dat in years[year]:
             print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
