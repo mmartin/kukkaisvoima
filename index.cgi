@@ -80,7 +80,7 @@ sidebarcomments = True
 # http://gravatar.com for more information
 gravatarsupport = True
 # Entry and comment Date format
-dateformat = "%F %T"
+dateformat = "%F"
 # Show only first paragraph when showing many entries
 entrysummary = False
 
@@ -125,6 +125,31 @@ version = '12dev'
 
 # for date collisions
 dates = {}
+datenow = datetime.now()
+
+def timeAgo(date):
+    day_str = ""
+    if date < datenow:
+        day_str += ", "
+        days = (datenow - date).days
+        years = days/365
+        if years > 0:
+            days = days%365
+            if years == 1:
+                day_str += "1 year"
+            else:
+                day_str += "%d years" % years
+            if days > 0:
+                day_str += " and "
+        if days == 1:
+            day_str += "1 day"
+        elif days > 1:
+            day_str += "%d days" % days
+        day_str += " ago"
+    return day_str
+
+def dateToString(date):
+    return "%s%s" % (strftime(dateformat, date.timetuple()), timeAgo(date))
 
 def generateDate(fileName):
     name, date, categories = fileName[:-4].split(':')
@@ -253,7 +278,7 @@ class Comment:
         self.email = email
         self.url = url
         self.comment = comment
-        self.date = datetime.now()
+        self.date = datenow
         self.subscribe = subscribe
         random.seed()
         self.id = "%016x" % random.getrandbits(128)
@@ -719,7 +744,7 @@ def renderComment(entry, comment, numofcomment,
         (numofcomment,
          entry.url,
          numofcomment,
-         strftime(dateformat, comment.date.timetuple()),
+         dateToString(comment.date),
          delcom)
     if pretext:
         print pretext
@@ -877,8 +902,7 @@ def renderDeleteComments(entry, commentnum):
     print "<cite>%s</cite>:" % comment.getAuthorLink()
 
     print "<br />"
-    print "<small>%s</small>" % (
-        strftime(dateformat, comment.date.timetuple()))
+    print "<small>%s</small>" % (dateToString(comment.date))
     print "<p>%s</p>" % comment.getText()
     print "</li>"
     print "</ol>"
@@ -954,7 +978,8 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
                 comma = ', '
             print "<a href=\"%s/%s\">%s</a>%s" % (baseurl, quote_plus(cat), cat, comma)
         print "</div>"
-        print "<div class=\"date\">%s: %s</div>" % (l_date, strftime(dateformat, entry.date.timetuple()))
+        print "<div class=\"date\">%s: %s</div>" % \
+            (l_date, dateToString(entry.date))
 
         # comments
         if len(entries) == 1:
