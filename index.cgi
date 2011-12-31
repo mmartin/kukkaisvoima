@@ -3,7 +3,7 @@
 
 Kukkaisvoima a lightweight weblog system.
 
-Copyright (C) 2006-2011 Petteri Klemola
+Copyright (C) 2006-2012 Petteri Klemola
 
 Kukkaisvoima is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License version 3
@@ -1039,16 +1039,29 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
 
     # sidebar
     print "<div id=\"sidebar\">"
+    print "<a href=\"%s/feed\">Subscribe <img alt=\"RSS Feed Icon\" src=\"feed-icon-14x14.png\" style=\"vertical-align:top; border:none;\"/></a>" % \
+        (baseurl)
+
     sortedcat = catelist.keys()
     try:
         sortedcat.sort(key=locale.strxfrm)
     except: # python < 2.4 fails
         sortedcat.sort()
     print "<h2><a href=\"%s/categories\">%s</a></h2>" % (baseurl, l_categories)
+
     print "<ul>"
+    rss_categories = list()
+    if category:
+        rss_categories.append(path[0])
+    elif len(entries) == 1:
+        rss_categories = entry.cat
     for cat in sortedcat:
-        print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
+        print "<li><a href=\"%s/%s\">%s</a> (%s)" % (
             baseurl, quote_plus(cat), cat, len(catelist[cat]))
+        if cat in rss_categories:
+            print "<a href=\"%s/%s/feed\"><img alt=\"RSS Feed Icon\" src=\"feed-icon-14x14.png\" style=\"vertical-align:top; border:none;\"/></a>" % \
+                (baseurl, cat)
+        print "</li>"
     print "</ul>"
 
     # search
