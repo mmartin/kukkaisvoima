@@ -130,22 +130,23 @@ datenow = datetime.now()
 def timeAgo(date):
     day_str = ""
     if date < datenow:
-        day_str += ", "
         days = (datenow - date).days
-        years = days/365
-        if years > 0:
-            days = days%365
-            if years == 1:
-                day_str += "1 year"
-            else:
-                day_str += "%d years" % years
-            if days > 0:
-                day_str += " and "
-        if days == 1:
-            day_str += "1 day"
-        elif days > 1:
-            day_str += "%d days" % days
-        day_str += " ago"
+        if days > 0:
+            day_str += ", "
+            years = days/365
+            if years > 0:
+                days = days%365
+                if years == 1:
+                    day_str += "1 year"
+                else:
+                    day_str += "%d years" % years
+                if days > 0:
+                    day_str += " and "
+            if days == 1:
+                day_str += "1 day"
+            elif days > 1:
+                day_str += "%d days" % days
+            day_str += " ago"
     return day_str
 
 def dateToString(date):
