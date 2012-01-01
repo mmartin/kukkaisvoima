@@ -655,6 +655,23 @@ def renderHtmlHeader(title=None, links=[]):
               }
           }
 
+          function toggle_categories(classname)
+          {
+              var elems = document.getElementsByClassName(classname);
+              for (var i = 0; i < elems.length; i++)
+              {
+                  var elem = elems[i];
+                  if (elem.style.display != 'none')
+                  {
+                      elem.style.display = 'none';
+                  }
+                  else
+                  {
+                      elem.style.display = '';
+                  }
+              }
+          }
+
           function validate_not_null(field, msg)
           {
               if (field.value == null || field.value == "")
@@ -1050,15 +1067,34 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
         sortedcat.sort()
     print "<h2><a href=\"%s/categories\">%s</a></h2>" % (baseurl, l_categories)
 
-    print "<ul>"
     rss_categories = list()
     if category:
         rss_categories.append(path[0])
     elif len(entries) == 1:
         rss_categories = entry.cat
+
+    cat_class_str = ""
+    sortedcat2 = list()
+    if len(catelist.keys()) > 5:
+        print "<a href=\"#\" onclick=\"toggle_categories('tcategory'); return false;\">Show more categories</a>"
+        sortedcat2 = catelist.keys()
+        sortedcat2.sort(key=lambda cat: len(catelist[cat]), reverse=True)
+        sortedcat2 = sortedcat2[:5]
+        if len(entries) == 1:
+            for cat in entry.cat:
+                if cat not in sortedcat2:
+                    sortedcat2.append(cat)
+        elif category and path[0] not in sortedcat2:
+            sortedcat2.append(path[0])
+        cat_class_str = " class=\"tcategory\" style=\"display:none;\""
+
+    print "<ul>"
     for cat in sortedcat:
-        print "<li><a href=\"%s/%s\">%s</a> (%s)" % (
-            baseurl, quote_plus(cat), cat, len(catelist[cat]))
+        add_str = ""
+        if len(sortedcat2) > 0 and cat not in sortedcat2:
+            add_str = cat_class_str
+        print "<li%s><a href=\"%s/%s\">%s</a> (%s)" % (
+            add_str, baseurl, quote_plus(cat), cat, len(catelist[cat]))
         if cat in rss_categories:
             print "<a href=\"%s/%s/feed\"><img alt=\"RSS Feed Icon\" src=\"feed-icon-14x14.png\" style=\"vertical-align:top; border:none;\"/></a>" % \
                 (baseurl, cat)
