@@ -938,31 +938,132 @@ def renderDeleteComments(entry, commentnum):
     renderHtmlFooter()
     return
 
+def renderSidebarCategories(catelist, rss_categories):
+    categories = catelist.keys()
+    try:
+        categories.sort(key=locale.strxfrm)
+    except: # python < 2.4 fails
+        categories.sort()
+    print "<h2><a href=\"%s/categories\">%s</a></h2>" % (baseurl, l_categories)
+
+    hide_cat_str = ""
+    topcategories = list()
+    if len(categories) > 5:
+        print "<a href=\"#\" onclick=\"toggle_categories('tcategory'); return false;\">Show more categories</a>"
+        topcategories = categories[:]
+        topcategories.sort(key=lambda cat: len(catelist[cat]), reverse=True)
+        topcategories = topcategories[:5]
+        for cat in rss_categories:
+            if cat not in topcategories:
+                topcategories.append(cat)
+        hide_cat_str = " class=\"tcategory\" style=\"display:none;\""
+
+    print "<ul>"
+    for cat in categories:
+        add_str = ""
+        if len(topcategories) > 0 and cat not in topcategories:
+            add_str = hide_cat_str
+        print "<li%s><a href=\"%s/%s\">%s</a> (%s)" % (
+            add_str, baseurl, quote_plus(cat), cat, len(catelist[cat]))
+        if cat in rss_categories:
+            print "<a href=\"%s/%s/feed\"><img alt=\"RSS Feed Icon\" src=\"feed-icon-14x14.png\" style=\"vertical-align:top; border:none;\"/></a>" % \
+                (baseurl, cat)
+        print "</li>"
+    print "</ul>"
+
+def renderSidebarSearch():
+    print "<h2>%s</h2>" % l_search
+    print "<form action=\"%s\" method=\"get\" id=\"searchform\">" % baseurl
+    print "<input type=\"text\" name=\"search\" id=\"search\" size=\"15\" /><br />"
+    print "<input type=\"submit\" value=\"%s\" />" % l_search
+    print "</form>"
+
+def renderSidebarCommments():
+    if sidebarcomments:
+        print "<h2>%s</h2>" % l_recent_comments
+        comlist = getCommentList()
+        if len(comlist) == 0:
+            print "No comments yet"
+        else:
+            print "<ul>"
+            for com in comlist:
+                print "<li>%s on <a href=\"%s/%s#comment-%d\">%s</a>"\
+                    % (com["author"], baseurl,
+                       quote_plus(com["file"][:-4]), com["num"], com["subject"])
+                print "</li>"
+            print "</ul>"
+
+def renderSidebarArchive(arclist):
+    print "<h2><a href=\"%s/archive\">%s</a> (%d)</h2>" % \
+        (baseurl, l_archives,
+         # total number of entries
+         sum([len(l) for l in [i for i in arclist.itervalues()]]))
+    print l_toggle
+    print "<ul>"
+    sortedarc = arclist.keys()
+    sortedarc.sort()
+    sortedarc.reverse()
+
+    # get years from archive and sort them
+    years = dict()
+    for d in sortedarc:
+        year = d.split("-", 1)[0]
+        if years.has_key(year) is False:
+            years[year] = list()
+        years[year].append(d)
+    years_keys = years.keys()
+    years_keys.sort()
+    years_keys.reverse()
+
+    # display each year at top lovel and if visiability is toggled
+    # then show months
+    for year in years_keys:
+        print "<li><a href=\"#\" onclick=\"toggle_years('con-year-%s'); return false;\">%s</a> (%d)" %\
+            (year, year,
+             # number of entries per year
+             sum([len(arclist[dat]) for dat in years[year]]))
+
+        print "<ul id=\"con-year-%s\" style=\"display:none;\">" % year
+        for dat in years[year]:
+            print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
+                baseurl, dat, dat, len(arclist[dat]))
+        print "</ul></li>"
+    print "</ul>"
+
+def renderSidebarAdmin(entries):
+    if len(entries) == 1:
+        print "<h2>%s</h2>" % l_admin
+        print "<ul>"
+        print "<li><a href=\"%s/%s/?admin\" rel=\"nofollow\">%s</a>" % \
+            (baseurl,
+             quote_plus(entries[0].fileName[:-4]),
+             l_admin_comments)
+        print "</ul>"
+
 def renderHtml(entries, path, catelist, arclist, admin, page):
     """Render the blog. Some template stuff might be nice :D"""
-    category = False
+    categories = list()
     if len(path) >= 1 and path[0] in catelist.keys():
-        category = True
+        categories.append(path[0])
+    elif len(entries) == 1:
+        categories = entries[0].cat
 
     # title
     title = None
     summary = False
     if len(entries) == 1:
         title = entries[0].headline
-    elif category:
-        title = path[0]
+    elif len(categories) == 1:
+        title = categories[0]
 
     if len(entries) > 1:
         summary = entrysummary
 
     rss = list()
-
     # additional rss feeds
-    if category:
-        rss.append("<link rel=\"alternate\" type=\"application/rss+xml\" title=\"%s: %s RSS Feed\" href=\"%s/%s/feed/\" />" % (blogname,path[0],baseurl,quote_plus(path[0])))
-    elif len(entries) == 1:
-        for cat in entries[0].cat:
-            rss.append("<link rel=\"alternate\" type=\"application/rss+xml\" title=\"%s: %s RSS Feed\" href=\"%s/%s/feed/\" />" % (blogname,cat,baseurl,quote_plus(cat)))
+    for cat in categories:
+        rss.append("<link rel=\"alternate\" type=\"application/rss+xml\" title=\"%s: %s RSS Feed\" href=\"%s/%s/feed/\" />" % \
+                       (blogname,cat,baseurl,quote_plus(cat)))
 
     renderHtmlHeader(title, rss)
 
@@ -1060,112 +1161,11 @@ def renderHtml(entries, path, catelist, arclist, admin, page):
     print "<a href=\"%s/feed\">Subscribe <img alt=\"RSS Feed Icon\" src=\"feed-icon-14x14.png\" style=\"vertical-align:top; border:none;\"/></a>" % \
         (baseurl)
 
-    sortedcat = catelist.keys()
-    try:
-        sortedcat.sort(key=locale.strxfrm)
-    except: # python < 2.4 fails
-        sortedcat.sort()
-    print "<h2><a href=\"%s/categories\">%s</a></h2>" % (baseurl, l_categories)
-
-    rss_categories = list()
-    if category:
-        rss_categories.append(path[0])
-    elif len(entries) == 1:
-        rss_categories = entry.cat
-
-    cat_class_str = ""
-    sortedcat2 = list()
-    if len(catelist.keys()) > 5:
-        print "<a href=\"#\" onclick=\"toggle_categories('tcategory'); return false;\">Show more categories</a>"
-        sortedcat2 = catelist.keys()
-        sortedcat2.sort(key=lambda cat: len(catelist[cat]), reverse=True)
-        sortedcat2 = sortedcat2[:5]
-        if len(entries) == 1:
-            for cat in entry.cat:
-                if cat not in sortedcat2:
-                    sortedcat2.append(cat)
-        elif category and path[0] not in sortedcat2:
-            sortedcat2.append(path[0])
-        cat_class_str = " class=\"tcategory\" style=\"display:none;\""
-
-    print "<ul>"
-    for cat in sortedcat:
-        add_str = ""
-        if len(sortedcat2) > 0 and cat not in sortedcat2:
-            add_str = cat_class_str
-        print "<li%s><a href=\"%s/%s\">%s</a> (%s)" % (
-            add_str, baseurl, quote_plus(cat), cat, len(catelist[cat]))
-        if cat in rss_categories:
-            print "<a href=\"%s/%s/feed\"><img alt=\"RSS Feed Icon\" src=\"feed-icon-14x14.png\" style=\"vertical-align:top; border:none;\"/></a>" % \
-                (baseurl, cat)
-        print "</li>"
-    print "</ul>"
-
-    # search
-    print "<h2>%s</h2>" % l_search
-    print "<form action=\"%s\" method=\"get\" id=\"searchform\">" % baseurl
-    print "<input type=\"text\" name=\"search\" id=\"search\" size=\"15\" /><br />"
-    print "<input type=\"submit\" value=\"%s\" />" % l_search
-    print "</form>"
-
-    if sidebarcomments:
-        print "<h2>%s</h2>" % l_recent_comments
-        comlist = getCommentList()
-        if len(comlist) == 0:
-            print "No comments yet"
-        else:
-            print "<ul>"
-            for com in comlist:
-                print "<li>%s on <a href=\"%s/%s#comment-%d\">%s</a>"\
-                    % (com["author"], baseurl,
-                       quote_plus(com["file"][:-4]), com["num"], com["subject"])
-                print "</li>"
-            print "</ul>"
-
-    # archive
-    print "<h2><a href=\"%s/archive\">%s</a> (%d)</h2>" % \
-        (baseurl, l_archives,
-         # total number of entries
-         sum([len(l) for l in [i for i in arclist.itervalues()]]))
-    print l_toggle
-    print "<ul>"
-    sortedarc = arclist.keys()
-    sortedarc.sort()
-    sortedarc.reverse()
-
-    # get years from archive and sort them
-    years = dict()
-    for d in sortedarc:
-        year = d.split("-", 1)[0]
-        if years.has_key(year) is False:
-            years[year] = list()
-        years[year].append(d)
-    years_keys = years.keys()
-    years_keys.sort()
-    years_keys.reverse()
-
-    # display each year at top lovel and if visiability is toggled
-    # then show months
-    for year in years_keys:
-        print "<li><a href=\"#\" onclick=\"toggle_years('con-year-%s'); return false;\">%s</a> (%d)" %\
-            (year, year,
-             # number of entries per year
-             sum([len(arclist[dat]) for dat in years[year]]))
-
-        print "<ul id=\"con-year-%s\" style=\"display:none;\">" % year
-        for dat in years[year]:
-            print "<li><a href=\"%s/%s\">%s</a> (%s)</li>" % (
-                baseurl, dat, dat, len(arclist[dat]))
-        print "</ul></li>"
-    print "</ul>"
-
-    if len(entries) == 1:
-        print "<h2>%s</h2>" % l_admin
-        print "<ul>"
-        print "<li><a href=\"%s/%s/?admin\" rel=\"nofollow\">%s</a>" % (baseurl,
-                                                                        quote_plus(entry.fileName[:-4]),
-                                                                        l_admin_comments)
-        print "</ul>"
+    renderSidebarCategories(catelist, categories)
+    renderSidebarSearch()
+    renderSidebarCommments()
+    renderSidebarArchive(arclist)
+    renderSidebarAdmin(entries)
 
     print "</div>" # sidebar
 
