@@ -126,11 +126,13 @@ version = '12dev'
 # for date collisions
 dates = {}
 datenow = datetime.now()
+datenow_date = datetime(datenow.year, datenow.month, datenow.day)
 
 def timeAgo(date):
     day_str = ""
-    if date < datenow:
-        days = (datenow - date).days
+    edate = datetime(date.year, date.month, date.day)
+    if edate < datenow_date :
+        days = (datenow_date - edate).days
         if days > 0:
             day_str += ", "
             years = days/365
