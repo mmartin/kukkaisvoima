@@ -112,7 +112,7 @@ l_search2 = "No matches"
 l_recent_comments = "Recent comments"
 l_notify_comments= "Notify me of follow-up comments via email."
 # new in version 11
-l_read_more = "..."
+l_read_more = "<p>Continue reading...</p>"
 # new in version 12
 l_toggle = "Click year to show months"
 
